@@ -1,0 +1,5 @@
+BusID,BusNumber,TimeSlot,TotalSeats,BookedSeats,AvailableSeats,IsReused,ReusedFrom
+B1,BUS1,11AM,40,1,39,False,
+B2,BUS2,1PM,40,1,39,False,
+B3,BUS3,4PM,40,1,39,False,
+B4,BUS4,6PM,40,1,39,False,

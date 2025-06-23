@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Bus Seat Allocation Optimizer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 2rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .bookings-table th,
+        .bookings-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .bookings-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .bookings-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-confirmed {
+            background: #d4edda;
+            color: #155724;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        /* Bus Layout */
+        .bus-layout {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+            margin-top: 1rem;
+        }
+
+        .seat {
+            aspect-ratio: 1;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .seat.available {
+            background: #d4edda;
+            color: #155724;
+            border-color: #28a745;
+        }
+
+        .seat.booked {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #dc3545;
+        }
+
+        .seat:hover {
+            transform: scale(1.05);
+        }
+
+        .bus-info {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .bus-info h4 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .bookings-table {
+                font-size: 0.9rem;
+            }
+
+            .bookings-table th,
+            .bookings-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </a>
+
+        <div class="header" data-aos="fade-down">
+            <h1><i class="fas fa-user-shield"></i> Admin Dashboard</h1>
+            <p>Monitor bus bookings and seat allocation</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Statistics Card -->
+            <div class="card" data-aos="fade-up" data-aos-delay="100">
+                <h2><i class="fas fa-chart-bar"></i> Overview Statistics</h2>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalBookings">0</div>
+                        <div class="stat-label">Total Bookings</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalBuses">4</div>
+                        <div class="stat-label">Active Buses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalSeats">160</div>
+                        <div class="stat-label">Total Seats</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="availableSeats">160</div>
+                        <div class="stat-label">Available Seats</div>
+                    </div>
+                </div>
+                <button class="refresh-btn" onclick="loadData()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
+            </div>
+
+            <!-- Bus Status Card -->
+            <div class="card" data-aos="fade-up" data-aos-delay="200">
+                <h2><i class="fas fa-bus"></i> Bus Status</h2>
+                <div id="busStatus">
+                    <!-- Bus status will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Table -->
+        <div class="table-container" data-aos="fade-up" data-aos-delay="300">
+            <h2><i class="fas fa-list"></i> All Bookings</h2>
+            <table class="bookings-table" id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Bus Number</th>
+                        <th>Seat Number</th>
+                        <th>Time Slot</th>
+                        <th>Destination</th>
+                        <th>Priority</th>
+                        <th>Special Needs</th>
+                        <th>Booking Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="bookingsTableBody">
+                    <!-- Bookings will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        // Load all data
+        async function loadData() {
+            await Promise.all([
+                loadBookings(),
+                loadBuses()
+            ]);
+            updateStatistics();
+            updateSeatStatus();
+        }
+
+        // Load bookings
+        async function loadBookings() {
+            try {
+                const response = await fetch('/api/bookings');
+                const bookings = await response.json();
+                displayBookings(bookings);
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+            }
+        }
+
+        // Load buses
+        async function loadBuses() {
+            try {
+                const response = await fetch('/api/buses');
+                const buses = await response.json();
+                displayBusStatus(buses);
+            } catch (error) {
+                console.error('Error loading buses:', error);
+            }
+        }
+
+        // Display bookings in table
+        function displayBookings(bookings) {
+            const tbody = document.getElementById('bookingsTableBody');
+            tbody.innerHTML = '';
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 2rem;">No bookings found</td></tr>';
+                return;
+            }
+
+            bookings.forEach(booking => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${booking.BookingID}</td>
+                    <td>${booking.StudentID}</td>
+                    <td>${booking.Name}</td>
+                    <td>${booking.Email}</td>
+                    <td>${booking.BusNumber}</td>
+                    <td><strong>${booking.SeatNumber}</strong></td>
+                    <td>${booking.TimeSlot}</td>
+                    <td>${booking.Destination}</td>
+                    <td>${booking.Priority}</td>
+                    <td>${booking.SpecialNeeds}</td>
+                    <td>${booking.BookingDate}</td>
+                    <td><span class="status-confirmed">${booking.Status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Display bus status
+        function displayBusStatus(buses) {
+            const busStatusDiv = document.getElementById('busStatus');
+            busStatusDiv.innerHTML = '';
+
+            buses.forEach(bus => {
+                const busDiv = document.createElement('div');
+                busDiv.className = 'bus-info';
+                
+                const bookedSeats = parseInt(bus.BookedSeats);
+                const totalSeats = parseInt(bus.TotalSeats);
+                const availableSeats = parseInt(bus.AvailableSeats);
+                const percentage = (bookedSeats / totalSeats) * 100;
+
+                busDiv.innerHTML = `
+                    <h4>${bus.BusNumber} - ${bus.TimeSlot}</h4>
+                    <p>Booked: ${bookedSeats} | Available: ${availableSeats} | Total: ${totalSeats}</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="bus-layout" id="bus-${bus.BusNumber}">
+                        ${generateSeatLayout(bus.BusNumber)}
+                    </div>
+                `;
+                busStatusDiv.appendChild(busDiv);
+            });
+            
+            // Update seat colors after generating layout
+            updateSeatStatus();
+        }
+
+        // Generate seat layout for a bus
+        function generateSeatLayout(busNumber) {
+            const seatRows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+            const seatCols = [1, 2, 3, 4];
+            let layout = '';
+
+            seatRows.forEach(row => {
+                seatCols.forEach(col => {
+                    const seatNumber = `${row}${col}`;
+                    layout += `<div class="seat available" data-seat="${seatNumber}" data-bus="${busNumber}">${seatNumber}</div>`;
+                });
+            });
+
+            return layout;
+        }
+
+        // Update seat status based on bookings
+        async function updateSeatStatus() {
+            try {
+                const [bookingsResponse, busesResponse] = await Promise.all([
+                    fetch('/api/bookings'),
+                    fetch('/api/buses')
+                ]);
+                
+                const bookings = await bookingsResponse.json();
+                const buses = await busesResponse.json();
+
+                // Reset all seats to available
+                document.querySelectorAll('.seat').forEach(seat => {
+                    seat.className = 'seat available';
+                });
+
+                // Mark booked seats
+                bookings.forEach(booking => {
+                    if (booking.Status === 'Confirmed') {
+                        const seatElement = document.querySelector(`[data-seat="${booking.SeatNumber}"][data-bus="${booking.BusNumber}"]`);
+                        if (seatElement) {
+                            seatElement.className = 'seat booked';
+                            seatElement.title = `Booked by ${booking.Name}`;
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error updating seat status:', error);
+            }
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const bookingsTable = document.getElementById('bookingsTableBody');
+            const totalBookings = bookingsTable.children.length;
+            
+            document.getElementById('totalBookings').textContent = totalBookings;
+            
+            // Calculate available seats
+            const totalSeats = 160; // 4 buses * 40 seats
+            const availableSeats = totalSeats - totalBookings;
+            document.getElementById('availableSeats').textContent = availableSeats;
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadData();
+        }, 30000);
+
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html> 

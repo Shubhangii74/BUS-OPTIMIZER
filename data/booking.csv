@@ -1,0 +1,5 @@
+BookingID,StudentID,Name,Email,BusNumber,SeatNumber,TimeSlot,Destination,BookingDate,Status,Priority,SpecialNeeds
+1,8484849,Shivang Jagwan,shivang070923@gmail.com,BUS1,A1,11AM,Rajpur Road,2025-06-20 06:45:45,Confirmed,High,None
+2,8484849,Shivang Jagwan,shivang072328@gmail.com,BUS2,H1,1PM,ISBT,2025-06-20 06:57:59,Confirmed,High,None
+3,489484,rahul,shivang070923@gmail.com,BUS3,A1,4PM,Rajpur Road,2025-06-20 07:04:40,Confirmed,High,None
+4,8484849,Shivang Jagwan,shivang.jagwan@gmail.com,BUS4,A1,6PM,Dehradun City,2025-06-20 07:26:31,Confirmed,Urgent,Disability
